@@ -70,3 +70,19 @@ func TestDiff_IgnoresComments(t *testing.T) {
 		t.Errorf("expected no changes, got %+v", res.Changes)
 	}
 }
+
+func TestDiff_MultipleChanges(t *testing.T) {
+	src := entries("FOO", "newbar", "NEW_KEY", "newval")
+	tgt := entries("FOO", "oldbar", "OLD_KEY", "oldval")
+	res := diff.Diff(src, tgt)
+	if len(res.Changes) != 3 {
+		t.Fatalf("expected 3 changes, got %d", len(res.Changes))
+	}
+	types := map[diff.ChangeType]int{}
+	for _, c := range res.Changes {
+		types[c.Type]++
+	}
+	if types[diff.Modified] != 1 || types[diff.Added] != 1 || types[diff.Removed] != 1 {
+		t.Errorf("unexpected change type counts: %+v", types)
+	}
+}
