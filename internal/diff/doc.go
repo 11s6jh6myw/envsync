@@ -17,9 +17,15 @@
 // The Format function renders a slice of Change records as a human-readable
 // diff string. FormatOptions controls:
 //
-//   - Color        – enable ANSI colour codes (green/red/yellow)
-//   - Redact       – mask sensitive values using the redact package
+//   - Color         – enable ANSI colour codes (green/red/yellow)
+//   - Redact        – mask sensitive values using the redact package
 //   - ShowUnchanged – include unchanged keys in the output
+//
+// # Filtering
+//
+// The Filter function returns a subset of changes matching a given Kind,
+// which is useful when callers only care about, for example, added or
+// removed keys without processing the full change list.
 //
 // # Usage
 //
@@ -27,4 +33,7 @@
 //	dst, _ := parser.Parse(dstBytes)
 //	changes := diff.Diff(src, dst)
 //	fmt.Print(diff.Format(changes, diff.DefaultFormatOptions()))
+//
+//	// Only show keys that were removed:
+//	removed := diff.Filter(changes, diff.KindRemoved)
 package diff
