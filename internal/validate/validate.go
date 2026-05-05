@@ -24,6 +24,21 @@ func (i Issue) String() string {
 	return fmt.Sprintf("%s: %s", i.Severity, i.Message)
 }
 
+// IsError reports whether the issue has error severity.
+func (i Issue) IsError() bool {
+	return i.Severity == "error"
+}
+
+// HasErrors returns true if any of the provided issues have error severity.
+func HasErrors(issues []Issue) bool {
+	for _, i := range issues {
+		if i.IsError() {
+			return true
+		}
+	}
+	return false
+}
+
 // Options controls which checks are performed.
 type Options struct {
 	RequiredKeys  []string
