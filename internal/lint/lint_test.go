@@ -15,20 +15,23 @@ func entries(pairs ...string) []parser.Entry {
 	return out
 }
 
+func assertIssueCount(t *testing.T, got []lint.Issue, want int) {
+	t.Helper()
+	if len(got) != want {
+		t.Fatalf("expected %d issue(s), got %d: %+v", want, len(got), got)
+	}
+}
+
 func TestLint_NoIssues(t *testing.T) {
 	got := lint.Lint(entries("DB_HOST", "localhost", "APP_PORT", "8080"), lint.DefaultOptions())
-	if len(got) != 0 {
-		t.Fatalf("expected no issues, got %d: %+v", len(got), got)
-	}
+	assertIssueCount(t, got, 0)
 }
 
 func TestLint_LowercaseKey(t *testing.T) {
 	opts := lint.DefaultOptions()
 	opts.RequireUppercase = true
 	got := lint.Lint(entries("db_host", "localhost"), opts)
-	if len(got) != 1 {
-		t.Fatalf("expected 1 issue, got %d", len(got))
-	}
+	assertIssueCount(t, got, 1)
 	if got[0].Severity != lint.SeverityWarning {
 		t.Errorf("expected warning, got %s", got[0].Severity)
 	}
@@ -50,9 +53,7 @@ func TestLint_LeadingSpace(t *testing.T) {
 	opts := lint.DefaultOptions()
 	opts.ForbidSpaces = true
 	got := lint.Lint(entries("APP_NAME", " myapp"), opts)
-	if len(got) != 1 {
-		t.Fatalf("expected 1 issue, got %d", len(got))
-	}
+	assertIssueCount(t, got, 1)
 	if got[0].Severity != lint.SeverityWarning {
 		t.Errorf("expected warning, got %s", got[0].Severity)
 	}
@@ -62,9 +63,7 @@ func TestLint_EmptyValueForbidden(t *testing.T) {
 	opts := lint.DefaultOptions()
 	opts.ForbidEmptyValue = true
 	got := lint.Lint(entries("MISSING_VAL", ""), opts)
-	if len(got) != 1 {
-		t.Fatalf("expected 1 issue, got %d", len(got))
-	}
+	assertIssueCount(t, got, 1)
 	if got[0].Severity != lint.SeverityError {
 		t.Errorf("expected error severity, got %s", got[0].Severity)
 	}
@@ -73,9 +72,7 @@ func TestLint_EmptyValueForbidden(t *testing.T) {
 func TestLint_SkipsBlankEntries(t *testing.T) {
 	entries := []parser.Entry{{Key: "", Value: ""}, {Key: "VALID_KEY", Value: "ok"}}
 	got := lint.Lint(entries, lint.DefaultOptions())
-	if len(got) != 0 {
-		t.Fatalf("expected no issues for blank entry, got %d", len(got))
-	}
+	assertIssueCount(t, got, 0)
 }
 
 func TestHasErrors_False(t *testing.T) {
